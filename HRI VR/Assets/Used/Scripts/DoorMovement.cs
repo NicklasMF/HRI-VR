@@ -13,6 +13,7 @@ public class DoorMovement : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (transform.position.x < MaxDistance) {
+			
 			transform.position = new Vector3 (transform.position.x + MoveSpeed * Time.deltaTime, transform.position.y, transform.position.z);
 		}
 	}
