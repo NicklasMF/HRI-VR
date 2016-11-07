@@ -15,6 +15,8 @@ public class PathFollowerPlayer : MonoBehaviour {
 
 	float _waitTime;
 
+	GameObject robot;
+	PathFollowerRobot robotScript;
 	Animator playerAnimator;
 	AudioSource audio;
 	Transform targetWayPoint;
@@ -22,15 +24,21 @@ public class PathFollowerPlayer : MonoBehaviour {
 	void Start () {
 		playerAnimator = GetComponent<Animator> ();
 		audio = GetComponent<AudioSource>();
+		robot = GameObject.FindGameObjectWithTag("Robot");
+		robotScript = robot.GetComponent<PathFollowerRobot>();
 	}
 
 	void Update () {
 		if (Input.GetKeyDown ("1")) {
-			playerAnimator.SetBool ("isWalking", true);
-			startWalking = true;
-
-			audio.Play();
+			StartExp(1, 1f);
 		}
+		if (Input.GetKeyDown ("2")) {
+			StartExp(2, 2f);
+		}
+		if (Input.GetKeyDown ("3")) {
+			StartExp(3, 1.5f);
+		}
+
 
 		if (timeLeftSound < 0.8f) {
 			timeLeftSound += 0.0008f;
@@ -50,9 +58,19 @@ public class PathFollowerPlayer : MonoBehaviour {
 		}
 	}
 
+	void StartExp(int _pos, float _speed) {
+		robotScript.SetEndPosition(_pos, _speed);
+		playerAnimator.SetBool ("isWalking", true);
+		startWalking = true;
+		audio.Play();
+	}
+
 	void Walk() {
 		if(transform.position == targetWayPoint.position) {
 			if (_waitTime > 0f) {
+				if (currentWayPoint == 1) {
+					robotScript.Wave();
+				}
 				playerAnimator.SetBool ("isWalking", false);
 				_waitTime -= Time.deltaTime;
 			} else {

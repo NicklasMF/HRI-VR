@@ -4,21 +4,38 @@ using System.Collections;
 public class PathFollowerRobot : MonoBehaviour {
 	
 	public Transform[] path;
-	public float speed = 5.0f;
+	public float speed;
 	public float reachDist = 1.0f;
 	public int currentPoint = 0;
 	public bool robotEndPos = false;
+	
+	int endPosition;
 	GameObject player;
 	PathFollowerPlayer playerScript;
+	Animator robotAnimator;
 
 
 	void Start () {
 		player = GameObject.Find ("Player");
 		playerScript = player.GetComponent<PathFollowerPlayer> ();
+		endPosition = 0;
+		speed = 0;
+		robotAnimator = GetComponent<Animator>();
+	}
+
+	public void SetEndPosition(int _position, float _speed) {
+		endPosition = _position + 1;
+		speed = _speed;
+		Debug.Log("Position: "+endPosition+", Speed: "+ speed +" er blevet sat for robot.");
+	}
+
+	public void Wave() {
+		robotAnimator.SetTrigger("wave");
 	}
 
 	void Update () {
-		if(playerScript.playerEndPos == true) {
+		if(playerScript.playerEndPos == true && endPosition != 0) {
+			
 			float dist = Vector3.Distance (path [currentPoint].position, transform.position);
 			transform.position = Vector3.MoveTowards (transform.position, path [currentPoint].position, Time.deltaTime * speed);
 
@@ -34,8 +51,13 @@ public class PathFollowerRobot : MonoBehaviour {
 			}
 
 			if (dist <= reachDist) {
-				if (currentPoint + 1 < path.Length) {
-					currentPoint++;
+				if (currentPoint < endPosition) {
+					if (currentPoint + 1 < path.Length) {
+						Debug.Log("Curr: "+currentPoint + ", End: "+endPosition);
+						currentPoint++;
+					} else {
+						robotEndPos = true;
+					}
 				}
 			}
 				
@@ -46,6 +68,7 @@ public class PathFollowerRobot : MonoBehaviour {
 			if (currentPoint >= path.Length) {
 				currentPoint = currentPoint;
 			}
+		
 		}
 	}
 
