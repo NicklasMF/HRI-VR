@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(AudioSource))]
+
 public class PathFollowerPlayer : MonoBehaviour {
 
 	public Transform[] wayPointList;
@@ -8,22 +10,32 @@ public class PathFollowerPlayer : MonoBehaviour {
 	public float reachDist = 1.0f;
 	public float timeLeftFirstRotate = 5.0f;
 	public float timeLeftSecondRotate = 10.0f;
+	private float timeLeftSound = 0.0f;
 	public int currentWayPoint = 0;
 	public bool playerEndPos = false;
 	public bool startWalking = false;
 	public bool firstRotate = true;
 	public bool secondRotate = false;
 	Animator playerAnimator;
+	AudioSource audio;
 	Transform targetWayPoint;
 
 	void Start () {
 		playerAnimator = GetComponent<Animator> ();
+		audio = GetComponent<AudioSource>();
 	}
 
 	void Update () {
 		if (Input.GetKeyDown ("1")) {
 			playerAnimator.SetBool ("isWalking", true);
 			startWalking = true;
+
+			audio.Play();
+		}
+
+		if (timeLeftSound < 0.8f) {
+			timeLeftSound += 0.0008f;
+			AudioListener.volume = timeLeftSound;
 		}
 
 		if (startWalking) {
@@ -73,6 +85,8 @@ public class PathFollowerPlayer : MonoBehaviour {
 							Walk ();
 						}
 					}
+
+
 				}
 
 				if (currentWayPoint == 4) {
