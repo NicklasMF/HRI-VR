@@ -13,7 +13,7 @@ public class PathFollowerRobot : MonoBehaviour {
 	GameObject player;
 	PathFollowerPlayer playerScript;
 	Animator robotAnimator;
-
+	AudioSource audio;
 
 	void Start () {
 		player = GameObject.Find ("Player");
@@ -21,6 +21,7 @@ public class PathFollowerRobot : MonoBehaviour {
 		endPosition = 0;
 		speed = 0;
 		robotAnimator = GetComponent<Animator>();
+		audio = GetComponent<AudioSource>();
 	}
 
 	public void SetEndPosition(int _position, float _speed) {
@@ -31,6 +32,11 @@ public class PathFollowerRobot : MonoBehaviour {
 
 	public void Wave() {
 		robotAnimator.SetTrigger("wave");
+	}
+
+	public void SayHello() {
+		audio.Play();
+		Debug.Log("Say Hello");
 	}
 
 	void Update () {
@@ -56,6 +62,7 @@ public class PathFollowerRobot : MonoBehaviour {
 						Debug.Log("Curr: "+currentPoint + ", End: "+endPosition);
 						currentPoint++;
 					} else {
+						SayHello();
 						robotEndPos = true;
 					}
 				}
@@ -63,6 +70,7 @@ public class PathFollowerRobot : MonoBehaviour {
 				
 			if (currentPoint + 1 == path.Length) {
 				robotEndPos = true;
+
 			}
 
 			if (currentPoint >= path.Length) {
