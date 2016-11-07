@@ -3,51 +3,108 @@ using System.Collections;
 
 public class PathFollowerPlayer : MonoBehaviour {
 
-	public Transform[] path;
-	public float speed = 5.0f;
+	public Transform[] wayPointList;
+	public float speed = 1.0f;
 	public float reachDist = 1.0f;
-	public int currentPoint = 0;
+	public float timeLeftFirstRotate = 5.0f;
+	public float timeLeftSecondRotate = 10.0f;
+	public int currentWayPoint = 0;
 	public bool playerEndPos = false;
+	public bool startWalking = false;
+	public bool firstRotate = true;
+	public bool secondRotate = false;
+	Animator playerAnimator;
+	Transform targetWayPoint;
 
 	void Start () {
-		
+		playerAnimator = GetComponent<Animator> ();
 	}
 
 	void Update () {
-		float dist = Vector3.Distance (path [currentPoint].position, transform.position);
-		transform.position = Vector3.MoveTowards (transform.position, path [currentPoint].position, Time.deltaTime * speed);
-
-		Vector3 movement = new Vector3 (transform.position.x, 0.0f, -transform.position.z);
-		Quaternion toRotate = Quaternion.Euler(0, 0, 0);
-
-		if (playerEndPos == false) {
-			transform.rotation = Quaternion.LookRotation (movement);
-		}
-		if (playerEndPos == true) {
-			transform.rotation = Quaternion.Slerp(transform.rotation, toRotate, Time.deltaTime*1.0f);
+		if (Input.GetKeyDown ("1")) {
+			playerAnimator.SetBool ("isWalking", true);
+			startWalking = true;
 		}
 
-		if (dist <= reachDist) {
-			if (currentPoint + 1 < path.Length) {
-				currentPoint++;
+		if (startWalking) {
+			if (currentWayPoint < this.wayPointList.Length) {
+				if (targetWayPoint == null) {
+					targetWayPoint = wayPointList [currentWayPoint];
+				}
+
+				Debug.Log ("CurrentPoint: " + currentWayPoint);
+
+				if (currentWayPoint == 0) {
+					Walk ();
+				}
+
+				if (currentWayPoint == 1) {
+					Walk ();
+				}
+
+				if (currentWayPoint == 2) {
+					transform.forward = Vector3.RotateTowards(transform.forward, targetWayPoint.position - transform.position, 0.5f*Time.deltaTime, 0.0f);
+					playerAnimator.SetBool ("isWalking", false);
+
+					timeLeftFirstRotate -= Time.deltaTime;
+					if (timeLeftFirstRotate < 0) {
+						playerAnimator.SetBool ("isWalking", true);
+						Walk ();
+					}
+				}
+
+				if (currentWayPoint == 3) {
+					playerAnimator.SetBool ("isWalking", false);
+					if (firstRotate == true) {
+						transform.forward = Vector3.RotateTowards(transform.forward, new Vector3(-2.5f, 0.5f, -1f) - transform.position, 0.5f*Time.deltaTime, 0.0f);
+					} 
+					else if (secondRotate == true) {
+						transform.forward = Vector3.RotateTowards(transform.forward, new Vector3(1f, 0.5f, -1.7f) - transform.position, 0.5f*Time.deltaTime, 0.0f);
+					}
+
+					timeLeftFirstRotate -= Time.deltaTime;
+					if (timeLeftFirstRotate < 0) {
+						firstRotate = false;
+						secondRotate = true;
+
+						timeLeftSecondRotate -= Time.deltaTime;
+						if (timeLeftSecondRotate < 0) {
+							playerAnimator.SetBool ("isWalking", true);
+							Walk ();
+						}
+					}
+				}
+
+				if (currentWayPoint == 4) {
+					playerAnimator.SetBool ("isWalking", false);
+					transform.forward = Vector3.RotateTowards(transform.forward, new Vector3(1.8f, 0.4f, 3f) - transform.position, 0.5f*Time.deltaTime, 0.0f);
+
+					timeLeftFirstRotate -= Time.deltaTime;
+					if (timeLeftFirstRotate < 0) {
+						playerEndPos = true;
+					}
+				}
 			}
-
-			if (currentPoint + 1 == path.Length) {
-				playerEndPos = true;
-			}
-		}
-
-		if (currentPoint >= path.Length) {
-			currentPoint = currentPoint;
 		}
 	}
 
+	void Walk() {
+		transform.position = Vector3.MoveTowards(transform.position, targetWayPoint.position,   speed*Time.deltaTime);
+
+		if(transform.position == targetWayPoint.position)
+		{
+			timeLeftFirstRotate = 5f;
+			currentWayPoint ++ ;
+			targetWayPoint = wayPointList[currentWayPoint];
+		}
+	} 
+
 	void OnDrawGizmos() {
-		if (path.Length > 0) {
-			for (int i = 0; i < path.Length; i++) {
-				if (path[i] != null) {
+		if (wayPointList.Length > 0) {
+			for (int i = 0; i < wayPointList.Length; i++) {
+				if (wayPointList[i] != null) {
 					Gizmos.color = Color.red;
-					Gizmos.DrawSphere(path[i].position, reachDist);
+					Gizmos.DrawSphere(wayPointList[i].position, reachDist);
 				}
 			}
 		}
