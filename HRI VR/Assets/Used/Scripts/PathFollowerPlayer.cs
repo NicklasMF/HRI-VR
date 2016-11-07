@@ -8,14 +8,13 @@ public class PathFollowerPlayer : MonoBehaviour {
 	public Transform[] wayPointList;
 	public float speed = 1.0f;
 	public float reachDist = 1.0f;
-	public float timeLeftFirstRotate = 5.0f;
-	public float timeLeftSecondRotate = 10.0f;
 	private float timeLeftSound = 0.0f;
 	public int currentWayPoint = 0;
 	public bool playerEndPos = false;
 	public bool startWalking = false;
-	public bool firstRotate = true;
-	public bool secondRotate = false;
+
+	float _waitTime;
+
 	Animator playerAnimator;
 	AudioSource audio;
 	Transform targetWayPoint;
@@ -44,72 +43,34 @@ public class PathFollowerPlayer : MonoBehaviour {
 					targetWayPoint = wayPointList [currentWayPoint];
 				}
 
-				Debug.Log ("CurrentPoint: " + currentWayPoint);
-
-				if (currentWayPoint == 0) {
-					Walk ();
-				}
-
-				if (currentWayPoint == 1) {
-					Walk ();
-				}
-
-				if (currentWayPoint == 2) {
-					transform.forward = Vector3.RotateTowards(transform.forward, targetWayPoint.position - transform.position, 0.5f*Time.deltaTime, 0.0f);
-					playerAnimator.SetBool ("isWalking", false);
-
-					timeLeftFirstRotate -= Time.deltaTime;
-					if (timeLeftFirstRotate < 0) {
-						playerAnimator.SetBool ("isWalking", true);
-						Walk ();
-					}
-				}
-
-				if (currentWayPoint == 3) {
-					playerAnimator.SetBool ("isWalking", false);
-					if (firstRotate == true) {
-						transform.forward = Vector3.RotateTowards(transform.forward, new Vector3(-2.5f, 0.5f, -1f) - transform.position, 0.5f*Time.deltaTime, 0.0f);
-					} 
-					else if (secondRotate == true) {
-						transform.forward = Vector3.RotateTowards(transform.forward, new Vector3(1f, 0.5f, -1.7f) - transform.position, 0.5f*Time.deltaTime, 0.0f);
-					}
-
-					timeLeftFirstRotate -= Time.deltaTime;
-					if (timeLeftFirstRotate < 0) {
-						firstRotate = false;
-						secondRotate = true;
-
-						timeLeftSecondRotate -= Time.deltaTime;
-						if (timeLeftSecondRotate < 0) {
-							playerAnimator.SetBool ("isWalking", true);
-							Walk ();
-						}
-					}
-
-
-				}
-
-				if (currentWayPoint == 4) {
-					playerAnimator.SetBool ("isWalking", false);
-					transform.forward = Vector3.RotateTowards(transform.forward, new Vector3(1.8f, 0.4f, 3f) - transform.position, 0.5f*Time.deltaTime, 0.0f);
-
-					timeLeftFirstRotate -= Time.deltaTime;
-					if (timeLeftFirstRotate < 0) {
-						playerEndPos = true;
-					}
+				if (currentWayPoint < wayPointList.Length) {
+					Walk();
 				}
 			}
 		}
 	}
 
 	void Walk() {
-		transform.position = Vector3.MoveTowards(transform.position, targetWayPoint.position,   speed*Time.deltaTime);
-
-		if(transform.position == targetWayPoint.position)
-		{
-			timeLeftFirstRotate = 5f;
-			currentWayPoint ++ ;
-			targetWayPoint = wayPointList[currentWayPoint];
+		if(transform.position == targetWayPoint.position) {
+			if (_waitTime > 0f) {
+				playerAnimator.SetBool ("isWalking", false);
+				_waitTime -= Time.deltaTime;
+			} else {
+				int _arrayLength = wayPointList.Length - 1;
+				if (currentWayPoint < _arrayLength) {
+					playerAnimator.SetBool ("isWalking", true);
+					currentWayPoint++;
+					targetWayPoint = wayPointList[currentWayPoint];
+					_waitTime = wayPointList[currentWayPoint].gameObject.GetComponent<DestinationPoint>().waitingTime;
+				} else {
+					playerAnimator.SetBool ("isWalking", false);
+					startWalking = false;
+					playerEndPos = true;
+					Debug.Log("Done moving");
+				}
+			}
+		} else {
+			transform.position = Vector3.MoveTowards(transform.position, targetWayPoint.position, speed*Time.deltaTime);
 		}
 	} 
 
