@@ -43,13 +43,13 @@ public class PathFollowerRobot : MonoBehaviour {
 	public void SayHello() {
 		Instantiate(sounds[0]);
 		saidHello = true;
-		Debug.Log("Say Hello");
+		Debug.Log("Robot saying hello");
 	}
 
 	void SayHelp() {
 		Instantiate(sounds[1]);
 		saidHelp = true;
-		Debug.Log("Say Helping");
+		Debug.Log("Robot saying helping");
 	}
 
 	void Update () {
@@ -65,14 +65,18 @@ public class PathFollowerRobot : MonoBehaviour {
 			
 			float dist = Vector3.Distance (path [currentPoint].position, transform.position);
 			transform.position = Vector3.MoveTowards (transform.position, path [currentPoint].position, Time.deltaTime * speed);
-			transform.forward = Vector3.RotateTowards(transform.forward, path[currentPoint].position - transform.position, Time.deltaTime * .4f, 0f);
-			Vector3 movement = new Vector3 (transform.position.x, 0.0f, -transform.position.z);
+
+			Vector3 rot = Vector3.RotateTowards(transform.forward, path[currentPoint].position - transform.position, Time.deltaTime * 3f, 0f);
+			transform.rotation = Quaternion.LookRotation(rot);
 			Quaternion toRotate = Quaternion.Euler(0, 180, 0);
+
+			/*transform.forward = Vector3.RotateTowards(transform.forward, path[currentPoint].position - transform.position, Time.deltaTime * .4f, 0f);
+			Vector3 movement = new Vector3 (transform.position.x, 0.0f, -transform.position.z);
 
 
 			if (robotEndPos == false) {
 				transform.rotation = Quaternion.LookRotation (movement);
-			}
+			}*/
 
 			if (robotEndPos == true) {
 				transform.rotation = Quaternion.Slerp(transform.rotation, toRotate, Time.deltaTime*1.0f);
@@ -84,7 +88,6 @@ public class PathFollowerRobot : MonoBehaviour {
 			if (dist <= reachDist) {
 				if (currentPoint < endPosition) {
 					if (currentPoint + 1 < path.Length) {
-						Debug.Log("Curr: "+currentPoint + ", End: "+endPosition);
 						currentPoint++;
 						if (currentPoint == endPosition) {
 							robotEndPos = true;

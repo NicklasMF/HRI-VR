@@ -29,10 +29,12 @@ public class PathFollowerPlayer : MonoBehaviour {
 	}
 
 	void Update () {
-		if (Input.GetKeyDown (KeyCode.Keypad1)) {
+		if (Input.GetKeyDown (KeyCode.Keypad1) || Input.GetKeyDown ("1")) {
 			StartExp(2, 0.4f);
+			Debug.Log(" -------- Situation 1 --------");
 		}
-		if (Input.GetKeyDown (KeyCode.Keypad2)) {
+		if (Input.GetKeyDown (KeyCode.Keypad2) || Input.GetKeyDown ("2")) {
+			Debug.Log(" -------- Situation 2 --------");
 			StartExp(3, 2f);
 		}
 		/*if (Input.GetKeyDown ("3")) {
@@ -87,7 +89,7 @@ public class PathFollowerPlayer : MonoBehaviour {
 					playerAnimator.SetBool ("isWalking", false);
 					startWalking = false;
 					playerEndPos = true;
-					Debug.Log("Done moving");
+					Debug.Log("Player done moving");
 				}
 			}
 		} else {
