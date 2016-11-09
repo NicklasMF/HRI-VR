@@ -10,18 +10,24 @@ public class PathFollowerRobot : MonoBehaviour {
 	public bool robotEndPos = false;
 	
 	int endPosition;
+	public bool saidHello;
+	public bool saidHelp;
 	GameObject player;
 	PathFollowerPlayer playerScript;
 	Animator robotAnimator;
-	AudioSource audio;
+
+	[SerializeField] GameObject[] sounds;
+
 
 	void Start () {
 		player = GameObject.Find ("Player");
 		playerScript = player.GetComponent<PathFollowerPlayer> ();
 		endPosition = 0;
 		speed = 0;
+		saidHello = false;
+		saidHelp = false;
 		robotAnimator = GetComponent<Animator>();
-		audio = GetComponent<AudioSource>();
+
 	}
 
 	public void SetEndPosition(int _position, float _speed) {
@@ -35,18 +41,34 @@ public class PathFollowerRobot : MonoBehaviour {
 	}
 
 	public void SayHello() {
-		audio.Play();
+		Instantiate(sounds[0]);
+		saidHello = true;
 		Debug.Log("Say Hello");
 	}
 
+	void SayHelp() {
+		Instantiate(sounds[1]);
+		saidHelp = true;
+		Debug.Log("Say Helping");
+	}
+
 	void Update () {
+		if (Input.GetKeyDown(KeyCode.Space)) {
+			SayHelp();
+		}
+		if (Input.GetKeyDown(KeyCode.A)) {
+			SayHello();
+		}
+
+
 		if(playerScript.playerEndPos == true && endPosition != 0) {
 			
 			float dist = Vector3.Distance (path [currentPoint].position, transform.position);
 			transform.position = Vector3.MoveTowards (transform.position, path [currentPoint].position, Time.deltaTime * speed);
-
+			transform.forward = Vector3.RotateTowards(transform.forward, path[currentPoint].position - transform.position, Time.deltaTime * .4f, 0f);
 			Vector3 movement = new Vector3 (transform.position.x, 0.0f, -transform.position.z);
 			Quaternion toRotate = Quaternion.Euler(0, 180, 0);
+
 
 			if (robotEndPos == false) {
 				transform.rotation = Quaternion.LookRotation (movement);
@@ -54,6 +76,9 @@ public class PathFollowerRobot : MonoBehaviour {
 
 			if (robotEndPos == true) {
 				transform.rotation = Quaternion.Slerp(transform.rotation, toRotate, Time.deltaTime*1.0f);
+				if (!saidHelp) {
+					SayHelp();
+				}
 			}
 
 			if (dist <= reachDist) {
@@ -61,8 +86,11 @@ public class PathFollowerRobot : MonoBehaviour {
 					if (currentPoint + 1 < path.Length) {
 						Debug.Log("Curr: "+currentPoint + ", End: "+endPosition);
 						currentPoint++;
+						if (currentPoint == endPosition) {
+							robotEndPos = true;
+						}
+
 					} else {
-						SayHello();
 						robotEndPos = true;
 					}
 				}
@@ -70,11 +98,6 @@ public class PathFollowerRobot : MonoBehaviour {
 				
 			if (currentPoint + 1 == path.Length) {
 				robotEndPos = true;
-
-			}
-
-			if (currentPoint >= path.Length) {
-				currentPoint = currentPoint;
 			}
 		
 		}

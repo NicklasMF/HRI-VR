@@ -29,15 +29,15 @@ public class PathFollowerPlayer : MonoBehaviour {
 	}
 
 	void Update () {
-		if (Input.GetKeyDown ("1")) {
-			StartExp(1, 1f);
+		if (Input.GetKeyDown (KeyCode.Keypad1)) {
+			StartExp(2, 0.4f);
 		}
-		if (Input.GetKeyDown ("2")) {
-			StartExp(2, 2f);
+		if (Input.GetKeyDown (KeyCode.Keypad2)) {
+			StartExp(3, 2f);
 		}
-		if (Input.GetKeyDown ("3")) {
+		/*if (Input.GetKeyDown ("3")) {
 			StartExp(3, 1.5f);
-		}
+		}*/
 
 
 		if (timeLeftSound < 0.8f) {
@@ -70,6 +70,9 @@ public class PathFollowerPlayer : MonoBehaviour {
 			if (_waitTime > 0f) {
 				if (currentWayPoint == 1) {
 					robotScript.Wave();
+				}
+				if (!robotScript.saidHello) {
+					robotScript.SayHello();
 				}
 				playerAnimator.SetBool ("isWalking", false);
 				_waitTime -= Time.deltaTime;
